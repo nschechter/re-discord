@@ -1,0 +1,47 @@
+{
+  "name": "re-discord",
+  "version": "0.0.0",
+  "description": "My Project",
+  "esy": {
+    "build": "dune build -p <PACKAGE_NAME>",
+    "buildDev": "pesy",
+    "release": { "releasedBinaries": [ "ReDiscordApp.exe" ] }
+  },
+  "buildDirs": {
+    "library": {
+      "require": [
+        "lwt", "cohttp", "yojson", "websocket", "websocket-lwt-unix"
+      ],
+      "name": "re-discord.lib",
+      "namespace": "ReDiscord",
+      "preprocess": [ "pps ppx_fast_pipe" ],
+      "includeSubdirs": "unqualified"
+    },
+    "executable": {
+      "require": [ "lwt", "re-discord.lib" ],
+      "main": "ReDiscordApp",
+      "name": "ReDiscordApp.exe"
+    }
+  },
+  "scripts": {
+    "pesy": "bash -c 'env PESY_MODE=update pesy'"
+  },
+  "dependencies": {
+    "@esy-ocaml/reason": "*",
+    "@opam/cohttp": "2.3.0",
+    "@opam/dune": ">=1.6.0",
+    "@opam/lwt": "4.2.1",
+    "@opam/ppx_fast_pipe": "0.0.1",
+    "@opam/tls": "0.10.4",
+    "@opam/websocket": "2.13",
+    "@opam/websocket-lwt-unix": "2.13",
+    "@opam/yojson": "1.7.0",
+    "ocaml": "^4.4.0"
+  },
+  "devDependencies": {
+    "ocaml": "4.7.1004",
+    "refmterr": "*",
+    "pesy": "*",
+    "@opam/merlin": "*"
+  }
+}
