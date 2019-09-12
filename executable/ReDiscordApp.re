@@ -1,6 +1,6 @@
 open Lwt.Infix;
 
-let token = "Mzg1NTUwNTk3MzE2NjczNTM3.XWLKvw.aptXh59bPNOHK7XY3xyk_MD0fgM";
+let token = Sys.getenv("DISCORD_BOT_TOKEN");
 
 let onMessageHandler =
     (sendReact, sendMessage, message: ReDiscord.MessageHandler.message) => {
