@@ -9,29 +9,11 @@ type heartbeat =
   | AlreadyInitialized;
 
 type state = {
-  heartbeat: int,
-  sequence: int,
+  heartbeatInterval: option(int),
+  token: string,
 };
 
-let heartbeat = ref(-1);
 let lastSequence = ref(0);
-
-let setHeartbeat = message => {
-  heartbeat^ < 0
-    ? message
-      |> Yojson.Basic.from_string
-      |> Util.extractHeartbeat
-      |> (
-        fun
-        | Some(num) => {
-            print_endline("Decoded heartbeat: " ++ string_of_int(num));
-            heartbeat := num / 1000;
-            Initialized;
-          }
-        | None => Error
-      )
-    : AlreadyInitialized;
-};
 
 let make = (uri, onMessageHandler, token) => {
   Client.connect(uri)
@@ -39,80 +21,68 @@ let make = (uri, onMessageHandler, token) => {
     ((recv, send)) => {
       print_endline("Connected to server");
 
-      let rec triggerHeartbeat = () => {
+      let sendMessage = (frame: Frame.t) => {
+        print_endline("Sending: " ++ frame.content);
+        send @@ frame;
+      };
+
+      let rec triggerHeartbeat = interval => {
         Lwt_timeout.create(
-          heartbeat^,
+          interval,
           () => {
-            print_endline(
-              "Sending heartbeat payload: "
-              ++ Payload.heartbeat(lastSequence^),
-            );
-            send @@
-            Frame.create(
-              ~opcode=Frame.Opcode.Text,
-              ~content=Payload.heartbeat(lastSequence^),
-              (),
+            sendMessage(
+              Frame.create(
+                ~opcode=Frame.Opcode.Text,
+                ~content=PayloadGenerator.heartbeat(lastSequence^),
+                (),
+              ),
             )
             |> ignore;
-            triggerHeartbeat();
+            triggerHeartbeat(interval);
           },
         )
         |> Lwt_timeout.start;
-      };
-
-      let sendMessage = (frame: Frame.t) => {
-        send @@ frame;
       };
 
       let setSequence = num => {
         lastSequence := num;
       };
 
-      let close = () => send @@ Frame.close(1002) >>= (() => Lwt.fail(Exit));
+      let close = () =>
+        sendMessage(Frame.close(1002)) >>= (() => Lwt.fail(Exit));
 
-      let handleMessage = message => {
-        setHeartbeat(message)
+      let handlePayload = (state, payload) => {
+        payload
+        |> PayloadParser.parse(setSequence)
         |> (
           fun
-          | Initialized => {
-              triggerHeartbeat();
-              print_endline(
-                "Sending identify payload: " ++ Payload.identify(token),
-              );
+          | Hello(int) => {
+              triggerHeartbeat(int / 1000);
               sendMessage(
                 Frame.create(
                   ~opcode=Opcode.Binary,
-                  ~content=Payload.identify(token),
+                  ~content=PayloadGenerator.identify(token),
                   (),
                 ),
               )
               |> ignore;
+              {heartbeatInterval: Some(int), token};
             }
-          | AlreadyInitialized =>
-            message
-            |> Parser.parse(setSequence)
-            |> (
-              fun
-              | Ready(data) => ignore()
-              | GuildCreate(data) => ignore()
-              | MessageCreate(data) =>
-                switch (onMessageHandler) {
-                | Some(handler) =>
-                  MessageHandler.handle(token, data, handler) |> ignore
-                | None => ignore()
-                }
-              | MessageReactionRemove(data) => ignore()
-              | MessageReactionAdd(data) => ignore()
-              | PresenceUpdate(data) => ignore()
-              | Unknown => ignore()
-              | HeartbeatACK => ignore()
-            )
-          | Error => {
-              print_endline("Unknown message, closing: " ++ message);
-              close() |> ignore;
+          | Ready(payload) => state
+          | GuildCreate(payload) => state
+          | MessageCreate(payload) =>
+            switch (onMessageHandler) {
+            | Some(handler) =>
+              MessageHandler.handle(token, payload.d, handler) |> ignore;
+              state;
+            | None => state
             }
+          | MessageReactionRemove(payload) => state
+          | MessageReactionAdd(payload) => state
+          | PresenceUpdate(payload) => state
+          | HeartbeatACK
+          | Unknown => state
         );
-        Lwt.return_unit;
       };
 
       let handleFrame = (fr, state) => {
@@ -122,27 +92,30 @@ let make = (uri, onMessageHandler, token) => {
         );
         print_endline("Receieved final: " ++ (fr.final |> string_of_bool));
         print_endline("Receieved content: " ++ fr.content);
-        switch (fr.opcode) {
-        | Opcode.Ping =>
-          send @@ Frame.create(~opcode=Opcode.Pong, ()) |> ignore
-        | Opcode.Text
-        | Opcode.Binary => handleMessage(fr.content) |> ignore
-        | _ => close() |> ignore
-        };
 
-        switch (state) {
-        | Some(state) => Lwt.return(Some(state))
-        | None => Lwt.return(None)
-        };
+        (
+          switch (fr.opcode) {
+          | Opcode.Ping =>
+            send @@ Frame.create(~opcode=Opcode.Pong, ()) |> ignore;
+            state;
+          | Opcode.Text
+          | Opcode.Binary => handlePayload(state, fr.content)
+          | _ =>
+            close() |> ignore;
+            state;
+          }
+        )
+        |> Lwt.return;
       };
 
-      let rec react_forever = state =>
+      let rec react_forever = (state: state) =>
         recv()
         >>= (
           frame =>
             handleFrame(frame, state) >>= (state => react_forever(state))
         );
-      react_forever(None);
+
+      react_forever({heartbeatInterval: None, token});
     }
   );
 };

@@ -1,11 +1,11 @@
 {
   "name": "re-discord",
-  "version": "0.0.0",
-  "description": "My Project",
+  "version": "0.0.1",
+  "description": "Native Discord Bot API",
   "esy": {
     "build": "dune build -p <PACKAGE_NAME>",
     "buildDev": "pesy",
-    "release": { "releasedBinaries": [ "ReDiscordApp.exe" ] }
+    "release": { "releasedBinaries": [ "PingBot.exe" ] }
   },
   "buildDirs": {
     "library": {
@@ -19,8 +19,8 @@
     },
     "executable": {
       "require": [ "lwt", "re-discord.lib" ],
-      "main": "ReDiscordApp",
-      "name": "ReDiscordApp.exe"
+      "main": "PingBot",
+      "name": "PingBot.exe"
     }
   },
   "scripts": {
