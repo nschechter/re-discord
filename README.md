@@ -7,12 +7,7 @@
 **Contains the following libraries and executables:**
 
 ```
-re-discord@0.0.0
-│
-├─test/
-│   name:    TestReDiscord.exe
-│   main:    TestReDiscord
-│   require: re-discord.lib
+re-discord@0.0.1
 │
 ├─library/
 │   library name: re-discord.lib
@@ -20,8 +15,8 @@ re-discord@0.0.0
 │   require:
 │
 └─executable/
-    name:    ReDiscordApp.exe
-    main:    ReDiscordApp
+    name:    PingBot.exe
+    main:    PingBot
     require: re-discord.lib
 ```
 
@@ -39,12 +34,6 @@ esy build
 After building the project, you can run the main binary that is produced.
 
 ```
-esy x ReDiscordApp.exe
-```
-
-## Running Tests:
-
-```
-# Runs the "test" command in `package.json`.
-esy test
+export DISCORD_BOT_TOKEN={INSERT_TOKEN}
+esy x PingBot.exe
 ```
