@@ -6,29 +6,36 @@ type response = {
 };
 
 type discordEvent =
-  | Ready(Yojson.Basic.t)
-  | GuildCreate(Yojson.Basic.t)
-  | MessageCreate(Yojson.Basic.t)
-  | PresenceUpdate(Yojson.Basic.t)
-  | MessageReactionAdd(Yojson.Basic.t)
-  | MessageReactionRemove(Yojson.Basic.t)
+  | Hello(int)
+  | Ready(response)
+  | GuildCreate(response)
+  | MessageCreate(response)
+  | PresenceUpdate(response)
+  | MessageReactionAdd(response)
+  | MessageReactionRemove(response)
   | HeartbeatACK
   | Unknown;
 
-let extractEvent = response => {
+let parseEvent = response => {
   switch (response.op, response.t) {
   | (0, Some(t)) =>
     switch (t) {
-    | "READY" => Ready(response.d)
-    | "GUILD_CREATE" => GuildCreate(response.d)
-    | "MESSAGE_CREATE" => MessageCreate(response.d)
-    | "PRESENCE_UPDATE" => PresenceUpdate(response.d)
-    | "MESSAGE_REACTION_ADD" => MessageReactionAdd(response.d)
-    | "MESSAGE_REACTION_REMOVE" => MessageReactionRemove(response.d)
+    | "READY" => Ready(response)
+    | "GUILD_CREATE" => GuildCreate(response)
+    | "MESSAGE_CREATE" => MessageCreate(response)
+    | "PRESENCE_UPDATE" => PresenceUpdate(response)
+    | "MESSAGE_REACTION_ADD" => MessageReactionAdd(response)
+    | "MESSAGE_REACTION_REMOVE" => MessageReactionRemove(response)
     | _ =>
       print_endline("Received unsupported type: " ++ t);
       Unknown;
     }
+  | (10, None) =>
+    Hello(
+      response.d
+      |> Yojson.Basic.Util.member("heartbeat_interval")
+      |> Yojson.Basic.Util.to_int,
+    )
   | (11, _) => HeartbeatACK
   | (_, _) => Unknown
   };
@@ -36,15 +43,13 @@ let extractEvent = response => {
 
 let extractSequence = (setSequence, response) => {
   switch (response.s) {
-  | Some(num) =>
-    print_endline("Extracted sequence: " ++ string_of_int(num));
-    setSequence(num);
+  | Some(num) => setSequence(num)
   | None => print_endline("No sequence?")
   };
   response;
 };
 
-let extractData = response => {
+let parseData = response => {
   op:
     response
     |> Yojson.Basic.from_string
@@ -64,5 +69,6 @@ let extractData = response => {
 };
 
 let parse = (setSequence, message) => {
-  message |> extractData |> extractSequence(setSequence) |> extractEvent;
+  // message |> extractData |> extractSequence(setSequence) |> extractEvent;
+  message |> parseData |> extractSequence(setSequence) |> parseEvent;
 };
