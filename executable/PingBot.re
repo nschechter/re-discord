@@ -1,15 +1,18 @@
 open Lwt.Infix;
+open ReDiscord;
 
-let token = Sys.getenv("DISCORD_BOT_TOKEN");
+let token = Sys.getenv_opt("DISCORD_BOT_TOKEN");
 
-let onMessageHandler =
-    (sendReact, sendMessage, message: ReDiscord.MessageHandler.message) => {
+let onMessage = (message: Message.t) => {
   switch (message.content) {
   | "ping" =>
-    sendMessage("pong");
-    sendReact("👍");
-  | _ => Lwt.return_unit
+    message |> Message.reply("pong") |> Message.react("👍") |> ignore
+  | _ => ignore()
   };
 };
 
-ReDiscord.Discord.make(~onMessageHandler, ~token) |> Lwt_main.run;
+switch (token) {
+| Some(token) => Discord.make(~onMessage, ~token) |> Lwt_main.run
+| None =>
+  print_endline("ERROR: No token found, try exporting DISCORD_BOT_TOKEN")
+};
