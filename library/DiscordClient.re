@@ -15,7 +15,7 @@ type state = {
 
 let lastSequence = ref(0);
 
-let make = (uri, onMessageHandler, token) => {
+let make = (uri, onMessage, token) => {
   Client.connect(uri)
   >>= (
     ((recv, send)) => {
@@ -71,7 +71,7 @@ let make = (uri, onMessageHandler, token) => {
           | Ready(payload) => state
           | GuildCreate(payload) => state
           | MessageCreate(payload) =>
-            switch (onMessageHandler) {
+            switch (onMessage) {
             | Some(handler) =>
               MessageHandler.handle(token, payload.d, handler) |> ignore;
               state;

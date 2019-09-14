@@ -1,20 +1,4 @@
-type author = {
-  username: string,
-  id: string,
-  discriminator: string,
-  avatar: string,
-};
-
-type message = {
-  id: string,
-  guildId: string,
-  content: string,
-  channelId: string,
-  author,
-  timestamp: string,
-};
-
-let extractAuthor = data => {
+let extractAuthor = (data: Yojson.Basic.t): Message.author => {
   username:
     data
     |> Yojson.Basic.Util.member("username")
@@ -28,7 +12,8 @@ let extractAuthor = data => {
     data |> Yojson.Basic.Util.member("avatar") |> Yojson.Basic.Util.to_string,
 };
 
-let extractMessage = data => {
+let extractMessage = (token: string, data: Yojson.Basic.t): Message.t => {
+  token,
   id: data |> Yojson.Basic.Util.member("id") |> Yojson.Basic.Util.to_string,
   guildId:
     data
@@ -47,11 +32,6 @@ let extractMessage = data => {
     |> Yojson.Basic.Util.to_string,
 };
 
-let handle = (token: string, data, onMessageHandler) => {
-  let message = data |> extractMessage;
-  onMessageHandler(
-    Channel.createReact(token, message.channelId, message.id),
-    Channel.createMessage(token, message.channelId),
-    message,
-  );
+let handle = (token, data, onMessage) => {
+  data |> extractMessage(token) |> onMessage;
 };
