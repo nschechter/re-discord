@@ -3,19 +3,23 @@ open Websocket;
 open Websocket_lwt_unix;
 open Frame;
 
-type heartbeat =
-  | Initialized
-  | Error
-  | AlreadyInitialized;
-
 type state = {
   heartbeatInterval: option(int),
   token: string,
+  sessionId: option(string),
 };
 
 let lastSequence = ref(0);
 
-let make = (uri, onMessage, token) => {
+let make =
+    (
+      uri,
+      ~onReady,
+      ~onMessage,
+      ~onGuildMemberAdd,
+      ~onGuildMemberRemove,
+      ~token,
+    ) => {
   Client.connect(uri)
   >>= (
     ((recv, send)) => {
@@ -66,10 +70,25 @@ let make = (uri, onMessage, token) => {
                 ),
               )
               |> ignore;
-              {heartbeatInterval: Some(int), token};
+              {heartbeatInterval: Some(int), token, sessionId: None};
             }
-          | Ready(payload) => state
+          | Ready(payload) => {
+              let readyInfo = ReadyHandler.handle(state, payload.d, onReady);
+              {
+                heartbeatInterval:
+                  state.heartbeatInterval
+                  |> (
+                    fun
+                    | Some(interval) => Some(interval)
+                    | None => None
+                  ),
+                token: state.token,
+                sessionId: Some(readyInfo.sessionId),
+              };
+            }
           | GuildCreate(payload) => state
+          | GuildMemberAdd(payload) => state
+          | GuildMemberRemove(payload) => state
           | MessageCreate(payload) =>
             switch (onMessage) {
             | Some(handler) =>
@@ -115,7 +134,7 @@ let make = (uri, onMessage, token) => {
             handleFrame(frame, state) >>= (state => react_forever(state))
         );
 
-      react_forever({heartbeatInterval: None, token});
+      react_forever({heartbeatInterval: None, token, sessionId: None});
     }
   );
 };

@@ -9,6 +9,8 @@ type discordEvent =
   | Hello(int)
   | Ready(response)
   | GuildCreate(response)
+  | GuildMemberAdd(response)
+  | GuildMemberRemove(response)
   | MessageCreate(response)
   | PresenceUpdate(response)
   | MessageReactionAdd(response)
@@ -22,6 +24,8 @@ let parseEvent = response => {
     switch (t) {
     | "READY" => Ready(response)
     | "GUILD_CREATE" => GuildCreate(response)
+    | "GUILD_MEMBER_ADD" => GuildMemberAdd(response)
+    | "GUILD_MEMBER_REMOVE" => GuildMemberRemove(response)
     | "MESSAGE_CREATE" => MessageCreate(response)
     | "PRESENCE_UPDATE" => PresenceUpdate(response)
     | "MESSAGE_REACTION_ADD" => MessageReactionAdd(response)
@@ -69,6 +73,5 @@ let parseData = response => {
 };
 
 let parse = (setSequence, message) => {
-  // message |> extractData |> extractSequence(setSequence) |> extractEvent;
   message |> parseData |> extractSequence(setSequence) |> parseEvent;
 };
