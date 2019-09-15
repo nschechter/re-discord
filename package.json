@@ -1,12 +1,20 @@
 {
   "name": "re-discord",
   "version": "0.0.1",
-  "description": "Native Discord Bot API",
+  "description": "Native Discord API for creating bots using ReasonML",
   "esy": {
     "build": "dune build -p <PACKAGE_NAME>",
     "buildDev": "pesy",
     "release": { "releasedBinaries": [ "PingBot.exe" ] }
   },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nschechter/re-discord"
+  },
+  "keywords": [
+    "discord"
+  ],
   "buildDirs": {
     "library": {
       "require": [
