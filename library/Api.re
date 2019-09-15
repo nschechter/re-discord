@@ -4,7 +4,7 @@ let encodeMessage = message =>
   `Assoc([("content", `String(message)), ("tts", `Bool(false))])
   |> Yojson.Basic.to_string;
 
-let createMessage = (token: string, channelId: string, message: string) => {
+let createMessage = (~token: string, ~channelId: string, message: string) => {
   Cohttp_lwt_unix.Client.post(
     ~headers=
       Cohttp.Header.init_with("Authorization", "Bot " ++ token)
@@ -28,7 +28,7 @@ let createMessage = (token: string, channelId: string, message: string) => {
 };
 
 let createReact =
-    (token: string, channelId: string, messageId: string, emoji: string) => {
+    (~token: string, ~channelId: string, ~messageId: string, emoji: string) => {
   Cohttp_lwt_unix.Client.put(
     ~headers=Cohttp.Header.init_with("Authorization", "Bot " ++ token),
     Uri.of_string(

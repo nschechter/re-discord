@@ -31,12 +31,22 @@ let extract = (token: string, data: Yojson.Basic.t): t => {
 };
 
 let reply = (content: string, message: t) => {
-  Api.createMessage(message.token, message.channelId, content) |> ignore;
+  Api.createMessage(
+    ~token=message.token,
+    ~channelId=message.channelId,
+    content,
+  )
+  |> ignore;
   message;
 };
 
 let react = (emoji: string, message: t) => {
-  Api.createReact(message.token, message.channelId, message.id, emoji)
+  Api.createReact(
+    ~token=message.token,
+    ~channelId=message.channelId,
+    ~messageId=message.id,
+    emoji,
+  )
   |> ignore;
   message;
 };

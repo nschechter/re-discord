@@ -16,6 +16,6 @@ let extract = (data: Yojson.Basic.t): t => {
   parentId: data |> member("parent_id") |> to_string_option,
 };
 
-let send = (~token, ~channelId, content) => {
-  Api.createMessage(token, channelId, content) |> ignore;
+let send = (~token: string, ~channel: t, content: string) => {
+  Api.createMessage(~token, ~channelId=channel.id, content) |> ignore;
 };
