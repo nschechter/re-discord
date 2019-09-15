@@ -25,7 +25,7 @@ let make =
     ((recv, send)) => {
       print_endline("Connected to server");
 
-      let sendMessage = (frame: Frame.t) => {
+      let sendFrame = (frame: Frame.t) => {
         print_endline("Sending: " ++ frame.content);
         send @@ frame;
       };
@@ -34,7 +34,7 @@ let make =
         Lwt_timeout.create(
           interval,
           () => {
-            sendMessage(
+            sendFrame(
               Frame.create(
                 ~opcode=Frame.Opcode.Text,
                 ~content=PayloadGenerator.heartbeat(lastSequence^),
@@ -53,7 +53,7 @@ let make =
       };
 
       let close = () =>
-        sendMessage(Frame.close(1002)) >>= (() => Lwt.fail(Exit));
+        sendFrame(Frame.close(1002)) >>= (() => Lwt.fail(Exit));
 
       let handlePayload = (state, payload) => {
         payload
@@ -62,7 +62,7 @@ let make =
           fun
           | Hello(int) => {
               triggerHeartbeat(int / 1000);
-              sendMessage(
+              sendFrame(
                 Frame.create(
                   ~opcode=Opcode.Binary,
                   ~content=PayloadGenerator.identify(token),
