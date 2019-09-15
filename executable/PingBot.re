@@ -3,10 +3,13 @@ open ReDiscord;
 let token = Sys.getenv_opt("DISCORD_BOT_TOKEN");
 
 let onMessage = (message: Message.t) => {
-  switch (message.content) {
-  | "ping" =>
-    message |> Message.reply("pong") |> Message.react("👍") |> ignore
-  | _ => ignore()
+  switch (message.content, token) {
+  | ("ping", Some(token)) =>
+    message
+    |> Message.reply(~token, "pong")
+    |> Message.react(~token, "👍")
+    |> ignore
+  | (_, _) => ignore()
   };
 };
 

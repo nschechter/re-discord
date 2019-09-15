@@ -4,8 +4,8 @@ open Websocket_lwt_unix;
 open Frame;
 
 type state = {
-  heartbeatInterval: option(int),
   token: string,
+  heartbeatInterval: option(int),
   sessionId: option(string),
   guild: option(Guild.t),
 };
@@ -19,6 +19,8 @@ let make =
       ~onMessage,
       ~onGuildMemberAdd,
       ~onGuildMemberRemove,
+      ~onReactionAdd,
+      ~onReactionRemove,
       ~token,
     ) => {
   Client.connect(uri)
@@ -72,8 +74,8 @@ let make =
               )
               |> ignore;
               {
-                heartbeatInterval: Some(int),
                 token,
+                heartbeatInterval: Some(int),
                 sessionId: None,
                 guild: None,
               };
@@ -81,16 +83,16 @@ let make =
           | Ready(payload) => {
               let readyInfo = ReadyHandler.handle(state, payload.d, onReady);
               {
-                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
+                heartbeatInterval: state.heartbeatInterval,
                 sessionId: Some(readyInfo.sessionId),
                 guild: None,
               };
             }
           | GuildCreate(payload) => {
               {
-                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
+                heartbeatInterval: state.heartbeatInterval,
                 sessionId: state.sessionId,
                 guild: Some(Guild.extract(payload.d)),
               };
@@ -100,15 +102,15 @@ let make =
             | (Some(handler), Some(guild)) =>
               handler(guild, GuildMemberHandler.handle(payload.d));
               {
-                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
+                heartbeatInterval: state.heartbeatInterval,
                 sessionId: state.sessionId,
                 guild:
                   Some(Guild.addMember(guild, payload.d |> Member.extract)),
               };
             | (_, Some(guild)) => {
-                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
+                heartbeatInterval: state.heartbeatInterval,
                 sessionId: state.sessionId,
                 guild:
                   Some(Guild.addMember(guild, payload.d |> Member.extract)),
@@ -120,8 +122,8 @@ let make =
             | (Some(handler), Some(guild)) =>
               handler(guild, GuildMemberHandler.handle(payload.d));
               {
-                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
+                heartbeatInterval: state.heartbeatInterval,
                 sessionId: state.sessionId,
                 guild:
                   Some(
@@ -142,8 +144,8 @@ let make =
           | ChannelCreate(payload) =>
             switch (state.guild) {
             | Some(guild) => {
-                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
+                heartbeatInterval: state.heartbeatInterval,
                 sessionId: state.sessionId,
                 guild:
                   Some(
@@ -155,8 +157,8 @@ let make =
           | ChannelDelete(payload) =>
             switch (state.guild) {
             | Some(guild) => {
-                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
+                heartbeatInterval: state.heartbeatInterval,
                 sessionId: state.sessionId,
                 guild:
                   Some(
@@ -165,15 +167,30 @@ let make =
               }
             | None => state
             }
-          | MessageCreate(payload) =>
-            switch (onMessage) {
-            | Some(handler) =>
-              MessageHandler.handle(token, payload.d, handler) |> ignore;
+          | MessageCreate(payload) => {
+              switch (onMessage) {
+              | Some(handler) =>
+                MessageHandler.handle(payload.d, handler) |> ignore
+              | None => ignore()
+              };
               state;
-            | None => state
             }
-          | MessageReactionRemove(payload) => state
-          | MessageReactionAdd(payload) => state
+          | MessageReactionRemove(payload) => {
+              switch (onReactionRemove) {
+              | Some(handler) =>
+                MessageHandler.handleReaction(payload.d, handler)
+              | None => ignore()
+              };
+              state;
+            }
+          | MessageReactionAdd(payload) => {
+              switch (onReactionAdd) {
+              | Some(handler) =>
+                MessageHandler.handleReaction(payload.d, handler)
+              | None => ignore()
+              };
+              state;
+            }
           | PresenceUpdate(payload) => state
           | HeartbeatACK
           | Unknown => state
@@ -211,8 +228,8 @@ let make =
         );
 
       react_forever({
-        heartbeatInterval: None,
         token,
+        heartbeatInterval: None,
         sessionId: None,
         guild: None,
       });
