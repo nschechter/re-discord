@@ -7,6 +7,7 @@ type state = {
   heartbeatInterval: option(int),
   token: string,
   sessionId: option(string),
+  guild: option(Guild.t),
 };
 
 let lastSequence = ref(0);
@@ -70,25 +71,44 @@ let make =
                 ),
               )
               |> ignore;
-              {heartbeatInterval: Some(int), token, sessionId: None};
+              {
+                heartbeatInterval: Some(int),
+                token,
+                sessionId: None,
+                guild: None,
+              };
             }
           | Ready(payload) => {
               let readyInfo = ReadyHandler.handle(state, payload.d, onReady);
               {
-                heartbeatInterval:
-                  state.heartbeatInterval
-                  |> (
-                    fun
-                    | Some(interval) => Some(interval)
-                    | None => None
-                  ),
+                heartbeatInterval: state.heartbeatInterval,
                 token: state.token,
                 sessionId: Some(readyInfo.sessionId),
+                guild: None,
               };
             }
-          | GuildCreate(payload) => state
-          | GuildMemberAdd(payload) => state
-          | GuildMemberRemove(payload) => state
+          | GuildCreate(payload) => {
+              {
+                heartbeatInterval: state.heartbeatInterval,
+                token: state.token,
+                sessionId: state.sessionId,
+                guild: Some(Guild.extract(payload.d)),
+              };
+            }
+          | GuildMemberAdd(payload) =>
+            switch (onGuildMemberAdd, state.guild) {
+            | (Some(handler), Some(guild)) =>
+              handler(guild, GuildMemberHandler.handle(payload.d));
+              state;
+            | (_, _) => state
+            }
+          | GuildMemberRemove(payload) =>
+            switch (onGuildMemberRemove, state.guild) {
+            | (Some(handler), Some(guild)) =>
+              handler(guild, GuildMemberHandler.handle(payload.d));
+              state;
+            | (_, _) => state
+            }
           | MessageCreate(payload) =>
             switch (onMessage) {
             | Some(handler) =>
@@ -134,7 +154,12 @@ let make =
             handleFrame(frame, state) >>= (state => react_forever(state))
         );
 
-      react_forever({heartbeatInterval: None, token, sessionId: None});
+      react_forever({
+        heartbeatInterval: None,
+        token,
+        sessionId: None,
+        guild: None,
+      });
     }
   );
 };
