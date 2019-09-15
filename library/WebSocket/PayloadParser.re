@@ -8,13 +8,15 @@ type response = {
 type discordEvent =
   | Hello(int)
   | Ready(response)
+  | ChannelCreate(response)
+  | ChannelDelete(response)
   | GuildCreate(response)
   | GuildMemberAdd(response)
   | GuildMemberRemove(response)
   | MessageCreate(response)
-  | PresenceUpdate(response)
   | MessageReactionAdd(response)
   | MessageReactionRemove(response)
+  | PresenceUpdate(response)
   | HeartbeatACK
   | Unknown;
 
@@ -23,11 +25,13 @@ let parseEvent = response => {
   | (0, Some(t)) =>
     switch (t) {
     | "READY" => Ready(response)
+    | "CHANNEL_CREATE" => ChannelCreate(response)
+    | "CHANNEL_DELETE" => ChannelDelete(response)
     | "GUILD_CREATE" => GuildCreate(response)
     | "GUILD_MEMBER_ADD" => GuildMemberAdd(response)
     | "GUILD_MEMBER_REMOVE" => GuildMemberRemove(response)
-    | "MESSAGE_CREATE" => MessageCreate(response)
     | "PRESENCE_UPDATE" => PresenceUpdate(response)
+    | "MESSAGE_CREATE" => MessageCreate(response)
     | "MESSAGE_REACTION_ADD" => MessageReactionAdd(response)
     | "MESSAGE_REACTION_REMOVE" => MessageReactionRemove(response)
     | _ =>

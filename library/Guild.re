@@ -27,7 +27,20 @@ let removeMember = (guild: t, member: Member.t): t => {
   channels: guild.channels,
   members:
     guild.members
-    |> List.filter((mem: Member.t) =>
-         mem.user.username != member.user.username
-       ),
+    |> List.filter((mem: Member.t) => mem.user.id != member.user.id),
+};
+
+let addChannel = (guild: t, channel: Channel.t): t => {
+  name: guild.name,
+  id: guild.id,
+  channels: List.append(guild.channels, [channel]),
+  members: guild.members,
+};
+
+let deleteChannel = (guild: t, channel: Channel.t): t => {
+  name: guild.name,
+  id: guild.id,
+  channels:
+    guild.channels |> List.filter((c: Channel.t) => c.id != channel.id),
+  members: guild.members,
 };

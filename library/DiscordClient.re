@@ -139,6 +139,32 @@ let make =
               }
             | (_, _) => state
             }
+          | ChannelCreate(payload) =>
+            switch (state.guild) {
+            | Some(guild) => {
+                heartbeatInterval: state.heartbeatInterval,
+                token: state.token,
+                sessionId: state.sessionId,
+                guild:
+                  Some(
+                    Guild.addChannel(guild, payload.d |> Channel.extract),
+                  ),
+              }
+            | None => state
+            }
+          | ChannelDelete(payload) =>
+            switch (state.guild) {
+            | Some(guild) => {
+                heartbeatInterval: state.heartbeatInterval,
+                token: state.token,
+                sessionId: state.sessionId,
+                guild:
+                  Some(
+                    Guild.deleteChannel(guild, payload.d |> Channel.extract),
+                  ),
+              }
+            | None => state
+            }
           | MessageCreate(payload) =>
             switch (onMessage) {
             | Some(handler) =>
