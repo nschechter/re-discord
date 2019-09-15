@@ -9,7 +9,7 @@ type user = {
 
 type t = {
   user,
-  guildId: string,
+  guildId: option(string),
 };
 
 let extractUser = (data: Yojson.Basic.t): user => {
@@ -21,5 +21,5 @@ let extractUser = (data: Yojson.Basic.t): user => {
 
 let extract = (data: Yojson.Basic.t): t => {
   user: data |> member("user") |> extractUser,
-  guildId: data |> member("guild_id") |> to_string,
+  guildId: data |> member("guild_id") |> to_string_option,
 };
