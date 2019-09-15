@@ -15,6 +15,7 @@ let lastSequence = ref(0);
 let make =
     (
       uri,
+      ~debug,
       ~onReady,
       ~onMessage,
       ~onGuildMemberAdd,
@@ -26,10 +27,8 @@ let make =
   Client.connect(uri)
   >>= (
     ((recv, send)) => {
-      print_endline("Connected to server");
-
       let sendFrame = (frame: Frame.t) => {
-        print_endline("Sending: " ++ frame.content);
+        debug ? print_endline("Sending: " ++ frame.content) : ignore();
         send @@ frame;
       };
 
@@ -198,12 +197,20 @@ let make =
       };
 
       let handleFrame = (fr, state) => {
-        print_endline("Received Opcode: " ++ (fr.opcode |> Opcode.to_string));
-        print_endline(
-          "Receieved extension: " ++ (fr.extension |> string_of_int),
-        );
-        print_endline("Receieved final: " ++ (fr.final |> string_of_bool));
-        print_endline("Receieved content: " ++ fr.content);
+        debug
+          ? {
+            print_endline(
+              "Received Opcode: " ++ (fr.opcode |> Opcode.to_string),
+            );
+            print_endline(
+              "Receieved extension: " ++ (fr.extension |> string_of_int),
+            );
+            print_endline(
+              "Receieved final: " ++ (fr.final |> string_of_bool),
+            );
+            print_endline("Receieved content: " ++ fr.content);
+          }
+          : ignore();
 
         (
           switch (fr.opcode) {

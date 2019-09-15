@@ -9,6 +9,7 @@ let make =
       ~onGuildMemberRemove=?,
       ~onReactionAdd=?,
       ~onReactionRemove=?,
+      ~debug=false,
       token: string,
     ) => {
   Util.getDiscordGateway(~token)
@@ -25,6 +26,7 @@ let make =
             ~onGuildMemberRemove,
             ~onReactionAdd,
             ~onReactionRemove,
+            ~debug,
             ~token,
           )
       }

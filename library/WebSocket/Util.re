@@ -64,7 +64,7 @@ let getDiscordGateway = (~token): Lwt.t(gatewayResponse) =>
       |> (
         fun
         | false => {
-            print_endline("Unable to make gateway connection");
+            print_endline("ERROR: Unable to make gateway connection");
             Lwt.return(Error);
           }
         | true =>

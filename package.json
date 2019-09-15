@@ -1,6 +1,6 @@
 {
   "name": "re-discord",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Native Discord API for creating bots using ReasonML",
   "esy": {
     "build": "dune build -p <PACKAGE_NAME>",

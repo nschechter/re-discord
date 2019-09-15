@@ -52,7 +52,7 @@ let parseEvent = response => {
 let extractSequence = (setSequence, response) => {
   switch (response.s) {
   | Some(num) => setSequence(num)
-  | None => print_endline("No sequence?")
+  | None => ignore()
   };
   response;
 };
