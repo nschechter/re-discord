@@ -11,8 +11,12 @@ let onMessage = (message: Message.t) => {
   };
 };
 
+let onReady = () => {
+  print_endline("Connected!");
+};
+
 switch (token) {
-| Some(token) => Discord.make(~onMessage, ~token) |> Lwt_main.run
+| Some(token) => Discord.make(~onReady, ~onMessage, token) |> Lwt_main.run
 | None =>
   print_endline("ERROR: No token found, try exporting DISCORD_BOT_TOKEN")
 };
