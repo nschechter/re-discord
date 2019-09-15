@@ -99,14 +99,44 @@ let make =
             switch (onGuildMemberAdd, state.guild) {
             | (Some(handler), Some(guild)) =>
               handler(guild, GuildMemberHandler.handle(payload.d));
-              state;
+              {
+                heartbeatInterval: state.heartbeatInterval,
+                token: state.token,
+                sessionId: state.sessionId,
+                guild:
+                  Some(Guild.addMember(guild, payload.d |> Member.extract)),
+              };
+            | (_, Some(guild)) => {
+                heartbeatInterval: state.heartbeatInterval,
+                token: state.token,
+                sessionId: state.sessionId,
+                guild:
+                  Some(Guild.addMember(guild, payload.d |> Member.extract)),
+              }
             | (_, _) => state
             }
           | GuildMemberRemove(payload) =>
             switch (onGuildMemberRemove, state.guild) {
             | (Some(handler), Some(guild)) =>
               handler(guild, GuildMemberHandler.handle(payload.d));
-              state;
+              {
+                heartbeatInterval: state.heartbeatInterval,
+                token: state.token,
+                sessionId: state.sessionId,
+                guild:
+                  Some(
+                    Guild.removeMember(guild, payload.d |> Member.extract),
+                  ),
+              };
+            | (_, Some(guild)) => {
+                heartbeatInterval: state.heartbeatInterval,
+                token: state.token,
+                sessionId: state.sessionId,
+                guild:
+                  Some(
+                    Guild.removeMember(guild, payload.d |> Member.extract),
+                  ),
+              }
             | (_, _) => state
             }
           | MessageCreate(payload) =>

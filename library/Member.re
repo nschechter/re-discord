@@ -7,7 +7,10 @@ type user = {
   avatar: string,
 };
 
-type t = {user};
+type t = {
+  user,
+  guildId: string,
+};
 
 let extractUser = (data: Yojson.Basic.t): user => {
   username: data |> member("username") |> to_string,
@@ -18,4 +21,5 @@ let extractUser = (data: Yojson.Basic.t): user => {
 
 let extract = (data: Yojson.Basic.t): t => {
   user: data |> member("user") |> extractUser,
+  guildId: data |> member("guild_id") |> to_string,
 };
