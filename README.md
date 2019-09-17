@@ -4,7 +4,7 @@
 **Contains the following libraries and executables:**
 
 ```
-re-discord@1.0.0
+re-discord@1.1.0
 │
 ├─library/
 │   library name: re-discord.lib
@@ -51,16 +51,18 @@ onReactionRemove(message)
 ### Sending a message
 
 ```
-Channel.send = (~token: string, ~channel: Channel.t, content: string)
-Message.reply = (~token: string, content: string, message: Message.t)
-Message.react = (~token: string, emoji: string, message: Message.t)
+Channel.send = (content: string, channel: Channel.t)
+Message.reply = (content: string, message: Message.t)
+Message.react = (emoji: string, message: Message.t)
 ```
 
 ### Future Plans
 
 ```
+- Resuming
 - Attachments
 - Higher level API
 - More events!
 - Voice Support
+- Sharding
 ```

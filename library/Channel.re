@@ -1,6 +1,7 @@
 open Yojson.Basic.Util;
 
 type t = {
+  token: string,
   type_: int,
   id: string,
   name: string,
@@ -8,7 +9,8 @@ type t = {
   parentId: option(string),
 };
 
-let extract = (data: Yojson.Basic.t): t => {
+let extract = (token: string, data: Yojson.Basic.t): t => {
+  token,
   type_: data |> member("type") |> to_int,
   id: data |> member("id") |> to_string,
   name: data |> member("name") |> to_string,
@@ -16,6 +18,7 @@ let extract = (data: Yojson.Basic.t): t => {
   parentId: data |> member("parent_id") |> to_string_option,
 };
 
-let send = (~token: string, ~channel: t, content: string) => {
-  Api.createMessage(~token, ~channelId=channel.id, content) |> ignore;
+let send = (content: string, channel: t) => {
+  Api.createMessage(~token=channel.token, ~channelId=channel.id, content)
+  |> ignore;
 };

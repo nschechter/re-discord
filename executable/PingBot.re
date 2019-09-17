@@ -3,13 +3,10 @@ open ReDiscord;
 let token = Sys.getenv_opt("DISCORD_BOT_TOKEN");
 
 let onMessage = (message: Message.t) => {
-  switch (message.content, token) {
-  | ("ping", Some(token)) =>
-    message
-    |> Message.reply(~token, "pong")
-    |> Message.react(~token, "👍")
-    |> ignore
-  | (_, _) => ignore()
+  switch (message.content) {
+  | "ping" =>
+    message |> Message.reply("pong") |> Message.react("👍") |> ignore
+  | _ => ignore()
   };
 };
 
@@ -18,7 +15,8 @@ let onReady = () => {
 };
 
 switch (token) {
-| Some(token) => Discord.make(~onReady, ~onMessage, token) |> Lwt_main.run
+| Some(token) =>
+  Discord.make(~debug=false, ~onReady, ~onMessage, token) |> Lwt_main.run
 | None =>
   print_endline("ERROR: No token found, try exporting DISCORD_BOT_TOKEN")
 };

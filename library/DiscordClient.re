@@ -93,7 +93,7 @@ let make =
                 token: state.token,
                 heartbeatInterval: state.heartbeatInterval,
                 sessionId: state.sessionId,
-                guild: Some(Guild.extract(payload.d)),
+                guild: Some(Guild.extract(token, payload.d)),
               };
             }
           | GuildMemberAdd(payload) =>
@@ -148,7 +148,10 @@ let make =
                 sessionId: state.sessionId,
                 guild:
                   Some(
-                    Guild.addChannel(guild, payload.d |> Channel.extract),
+                    Guild.addChannel(
+                      guild,
+                      payload.d |> Channel.extract(token),
+                    ),
                   ),
               }
             | None => state
@@ -161,7 +164,10 @@ let make =
                 sessionId: state.sessionId,
                 guild:
                   Some(
-                    Guild.deleteChannel(guild, payload.d |> Channel.extract),
+                    Guild.deleteChannel(
+                      guild,
+                      payload.d |> Channel.extract(token),
+                    ),
                   ),
               }
             | None => state
@@ -169,7 +175,7 @@ let make =
           | MessageCreate(payload) => {
               switch (onMessage) {
               | Some(handler) =>
-                MessageHandler.handle(payload.d, handler) |> ignore
+                MessageHandler.handle(token, payload.d, handler) |> ignore
               | None => ignore()
               };
               state;
@@ -177,7 +183,7 @@ let make =
           | MessageReactionRemove(payload) => {
               switch (onReactionRemove) {
               | Some(handler) =>
-                MessageHandler.handleReaction(payload.d, handler)
+                MessageHandler.handleReaction(token, payload.d, handler)
               | None => ignore()
               };
               state;
@@ -185,7 +191,7 @@ let make =
           | MessageReactionAdd(payload) => {
               switch (onReactionAdd) {
               | Some(handler) =>
-                MessageHandler.handleReaction(payload.d, handler)
+                MessageHandler.handleReaction(token, payload.d, handler)
               | None => ignore()
               };
               state;

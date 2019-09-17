@@ -7,6 +7,7 @@ type emoji = {
 };
 
 type t = {
+  token: string,
   userId: string,
   messageId: string,
   emoji,
@@ -20,7 +21,8 @@ let extractEmoji = (data: Yojson.Basic.t): emoji => {
   animated: data |> member("user_id") |> to_bool,
 };
 
-let extract = (data: Yojson.Basic.t): t => {
+let extract = (token: string, data: Yojson.Basic.t): t => {
+  token,
   userId: data |> member("user_id") |> to_string,
   messageId: data |> member("message_id") |> to_string,
   emoji: data |> member("emoji") |> extractEmoji,

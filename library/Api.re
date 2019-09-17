@@ -21,8 +21,7 @@ let createMessage = (~token: string, ~channelId: string, message: string) => {
   )
   >>= (
     ((_resp, body)) => {
-      Cohttp_lwt__.Body.to_string(body)
-      >>= (body => body |> print_endline |> Lwt.return);
+      Cohttp_lwt__.Body.to_string(body) >>= (body => body |> Lwt.return);
     }
   );
 };
@@ -46,8 +45,7 @@ let createReact =
   )
   >>= (
     ((_resp, body)) => {
-      Cohttp_lwt__.Body.to_string(body)
-      >>= (body => body |> print_endline |> Lwt.return);
+      Cohttp_lwt__.Body.to_string(body) >>= (body => body |> Lwt.return);
     }
   );
 };

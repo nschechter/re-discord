@@ -1,6 +1,7 @@
 open Yojson.Basic.Util;
 
 type t = {
+  token: string,
   id: string,
   guildId: string,
   content: string,
@@ -9,7 +10,8 @@ type t = {
   timestamp: string,
 };
 
-let make = (id, guildId, content, channelId, author, timestamp): t => {
+let make = (token, id, guildId, content, channelId, author, timestamp): t => {
+  token,
   id,
   guildId,
   content,
@@ -18,7 +20,8 @@ let make = (id, guildId, content, channelId, author, timestamp): t => {
   timestamp,
 };
 
-let extract = (data: Yojson.Basic.t): t => {
+let extract = (token, data: Yojson.Basic.t): t => {
+  token,
   id: data |> member("id") |> to_string,
   guildId: data |> member("guild_id") |> to_string,
   content: data |> member("content") |> to_string,
@@ -27,14 +30,19 @@ let extract = (data: Yojson.Basic.t): t => {
   timestamp: data |> member("timestamp") |> to_string,
 };
 
-let reply = (~token: string, content: string, message: t) => {
-  Api.createMessage(~token, ~channelId=message.channelId, content) |> ignore;
+let reply = (content: string, message: t) => {
+  Api.createMessage(
+    ~token=message.token,
+    ~channelId=message.channelId,
+    content,
+  )
+  |> ignore;
   message;
 };
 
-let react = (~token: string, emoji: string, message: t) => {
+let react = (emoji: string, message: t) => {
   Api.createReact(
-    ~token,
+    ~token=message.token,
     ~channelId=message.channelId,
     ~messageId=message.id,
     emoji,

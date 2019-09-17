@@ -1,7 +1,7 @@
-let handle = (data, onMessage) => {
-  data |> Message.extract |> onMessage;
+let handle = (token, data, onMessage) => {
+  data |> Message.extract(token) |> onMessage;
 };
 
-let handleReaction = (data, handler) => {
-  data |> MessageReaction.extract |> handler;
+let handleReaction = (token, data, handler) => {
+  data |> MessageReaction.extract(token) |> handler;
 };

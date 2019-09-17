@@ -11,16 +11,16 @@ let onGuildMemberAdd = (guild: Guild.t, member: Member.user) => {
     guild.channels
     |> List.find_opt((channel: Channel.t) => channel.name == "general");
 
-  switch (generalChannel, token) {
-  | (Some(channel), Some(token)) =>
-    Channel.send(~token, ~channel, "Welcome, " ++ member.username)
-  | (_, _) => ignore()
+  switch (generalChannel) {
+  | Some(channel) => channel |> Channel.send("Welcome, " ++ member.username)
+  | _ => ignore()
   };
 };
 
 switch (token) {
 | Some(token) =>
-  Discord.make(~onGuildMemberAdd, ~onReady, token) |> Lwt_main.run
+  Discord.make(~debug=false, ~onGuildMemberAdd, ~onReady, token)
+  |> Lwt_main.run
 | None =>
   print_endline("ERROR: No token found, try exporting DISCORD_BOT_TOKEN")
 };

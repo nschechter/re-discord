@@ -7,10 +7,11 @@ type t = {
   members: list(Member.t),
 };
 
-let extract = (data: Yojson.Basic.t): t => {
+let extract = (token, data: Yojson.Basic.t): t => {
   name: data |> member("name") |> to_string,
   id: data |> member("id") |> to_string,
-  channels: data |> member("channels") |> convert_each(Channel.extract),
+  channels:
+    data |> member("channels") |> convert_each(Channel.extract(token)),
   members: data |> member("members") |> convert_each(Member.extract),
 };
 
