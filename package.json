@@ -3,8 +3,9 @@
   "version": "1.1.0",
   "description": "Native Discord API for creating bots using ReasonML",
   "esy": {
-    "build": "dune build -p <PACKAGE_NAME>",
-    "buildDev": "pesy",
+    "build": "dune build -p #{self.name}",
+    "buildDev":
+      "refmterr dune build --promote-install-files --root . --only-package #{self.name}",
     "release": { "releasedBinaries": [ "PingBot.exe" ] }
   },
   "license": "MIT",
@@ -12,44 +13,25 @@
     "type": "git",
     "url": "git+https://github.com/nschechter/re-discord"
   },
-  "keywords": [
-    "discord"
-  ],
-  "buildDirs": {
-    "library": {
-      "require": [
-        "lwt", "cohttp", "yojson", "websocket", "websocket-lwt-unix"
-      ],
-      "name": "re-discord.lib",
-      "namespace": "ReDiscord",
-      "preprocess": [ "pps ppx_fast_pipe" ],
-      "includeSubdirs": "unqualified"
-    },
-    "executable": {
-      "require": [ "lwt", "re-discord.lib" ],
-      "main": "PingBot",
-      "name": "PingBot.exe"
-    }
-  },
   "scripts": {
-    "pesy": "bash -c 'env PESY_MODE=update pesy'"
+    "test": "esy x dune exec RunTests"
   },
+  "keywords": [ "discord" ],
   "dependencies": {
-    "@esy-ocaml/reason": "*",
-    "@opam/cohttp": "2.3.0",
-    "@opam/dune": ">=1.6.0",
-    "@opam/lwt": "4.2.1",
-    "@opam/ppx_fast_pipe": "0.0.1",
-    "@opam/tls": "0.10.4",
-    "@opam/websocket": "2.13",
-    "@opam/websocket-lwt-unix": "2.13",
+    "@esy-ocaml/reason": ">= 3.4.0 < 3.6.0",
+    "@opam/cohttp": "2.5.1",
+    "@opam/dune": "*",
+    "@opam/lwt": "5.3.0",
+    "@opam/tls": "0.12.0",
+    "@opam/websocket": "2.14",
+    "@opam/websocket-lwt-unix": "2.14",
     "@opam/yojson": "1.7.0",
-    "ocaml": "^4.4.0"
+    "@reason-native/rely": "^3.2.1",
+    "ocaml": "~4.8.1000"
   },
   "devDependencies": {
-    "ocaml": "4.7.1004",
+    "ocaml": "~4.8.1000",
     "refmterr": "*",
-    "pesy": "*",
     "@opam/merlin": "*"
   }
 }
