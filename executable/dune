@@ -1,6 +1,5 @@
 
 (executable
-   (package pingbot)
    (name PingBot)
    (public_name PingBot.exe)
    (libraries lwt re-discord.lib)
