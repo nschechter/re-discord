@@ -1,0 +1,22 @@
+(library
+  (name ReDiscordTest)
+  (public_name re-discord.tests)
+  ; IMPORTANT: -linkall flag is required to include all tests.
+  (ocamlopt_flags -linkall -g)
+  (libraries
+    lwt
+    ReDiscord
+    rely.lib
+  )
+  (modules (:standard \ RunTests))
+)
+
+(executable
+  (package tests)
+  (name RunTests)
+  (public_name RunTests)
+  (libraries
+    ReDiscordTest
+  )
+  (modules RunTests)
+)
