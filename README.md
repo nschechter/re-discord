@@ -1,22 +1,5 @@
 # re-discord
 
-
-**Contains the following libraries and executables:**
-
-```
-re-discord@1.1.0
-│
-├─library/
-│   library name: re-discord.lib
-│   namespace:    ReDiscord
-│
-│
-└─executable/
-    name:    PingBot.exe
-    main:    PingBot
-    require: re-discord.lib
-```
-
 ## Developing:
 
 ```
