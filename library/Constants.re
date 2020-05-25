@@ -1,14 +1,3 @@
-type http = {
-  baseApi: string,
-  version: string,
-};
-
-type endpoints = {botGateway: string};
-
-let http = {baseApi: "https://discordapp.com/api", version: "7"};
-
-let endpoints = {botGateway: "/gateway/bot"};
-
 module DiscordOpCodes = {
   type t =
     | DISPATCH

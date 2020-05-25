@@ -1,5 +1,3 @@
-open Lwt.Infix;
-
 type sessionStartLimit = {
   total: int,
   remaining: int,
@@ -44,39 +42,3 @@ let extractHeartbeat = (json: Yojson.Basic.t): option(int) =>
   |> Yojson.Basic.Util.member("d")
   |> Yojson.Basic.Util.member("heartbeat_interval")
   |> Yojson.Basic.Util.to_int_option;
-
-let getDiscordGateway = (~token): Lwt.t(gatewayResponse) =>
-  Cohttp_lwt_unix.Client.get(
-    ~headers=Cohttp.Header.init_with("Authorization", "Bot " ++ token),
-    Uri.of_string(
-      Constants.http.baseApi
-      ++ "/v"
-      ++ Constants.http.version
-      ++ Constants.endpoints.botGateway,
-    ),
-  )
-  >>= (
-    ((resp, body)) => {
-      resp
-      |> Cohttp.Response.status
-      |> Cohttp.Code.code_of_status
-      |> Cohttp.Code.is_success
-      |> (
-        fun
-        | false => {
-            print_endline("ERROR: Unable to make gateway connection");
-            Lwt.return(Error);
-          }
-        | true =>
-          Cohttp_lwt__.Body.to_string(body)
-          >>= (
-            body => {
-              body
-              |> Yojson.Basic.from_string
-              |> extractGatewayResponse
-              |> Lwt.return;
-            }
-          )
-      );
-    }
-  );

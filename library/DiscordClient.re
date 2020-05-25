@@ -1,6 +1,5 @@
 open Lwt.Infix;
 open Websocket;
-open Websocket_lwt_unix;
 open Frame;
 
 type state = {
@@ -14,7 +13,6 @@ let lastSequence = ref(0);
 
 let make =
     (
-      uri,
       ~debug,
       ~onReady,
       ~onMessage,
@@ -23,6 +21,7 @@ let make =
       ~onReactionAdd,
       ~onReactionRemove,
       ~token,
+      uri,
     ) => {
   Client.connect(uri)
   >>= (
@@ -38,7 +37,7 @@ let make =
           () => {
             sendFrame(
               Frame.create(
-                ~opcode=Frame.Opcode.Text,
+                ~opcode=Opcode.Text,
                 ~content=PayloadGenerator.heartbeat(lastSequence^),
                 (),
               ),
@@ -196,13 +195,13 @@ let make =
               };
               state;
             }
-          | PresenceUpdate(payload) => state
+          | PresenceUpdate(_) => state
           | HeartbeatACK
           | Unknown => state
         );
       };
 
-      let handleFrame = (fr, state) => {
+      let handleFrame = (fr: Frame.t, state) => {
         debug
           ? {
             print_endline(

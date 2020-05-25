@@ -57,7 +57,7 @@ let extractSequence = (setSequence, response) => {
   response;
 };
 
-let parseData = response => {
+let extractPayload = response => {
   op:
     response
     |> Yojson.Basic.from_string
@@ -77,5 +77,5 @@ let parseData = response => {
 };
 
 let parse = (setSequence, message) => {
-  message |> parseData |> extractSequence(setSequence) |> parseEvent;
+  message |> extractPayload |> extractSequence(setSequence) |> parseEvent;
 };

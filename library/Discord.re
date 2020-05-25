@@ -1,5 +1,4 @@
 open Lwt.Infix;
-open Util;
 
 let make =
     (
@@ -12,23 +11,23 @@ let make =
       ~debug=false,
       token: string,
     ) => {
-  Util.getDiscordGateway(~token)
+  Api.getDiscordGateway(~token)
   >>= (
     response =>
       switch (response) {
       | Error => Lwt.return_unit
       | Success(data) =>
         Uri.with_scheme(Uri.of_string(data.url), Some("https"))
-        ->DiscordClient.make(
-            ~onReady,
-            ~onMessage,
-            ~onGuildMemberAdd,
-            ~onGuildMemberRemove,
-            ~onReactionAdd,
-            ~onReactionRemove,
-            ~debug,
-            ~token,
-          )
+        |> DiscordClient.make(
+             ~onReady,
+             ~onMessage,
+             ~onGuildMemberAdd,
+             ~onGuildMemberRemove,
+             ~onReactionAdd,
+             ~onReactionRemove,
+             ~debug,
+             ~token,
+           )
       }
   );
 };
