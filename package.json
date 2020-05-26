@@ -4,12 +4,9 @@
   "description": "Native Discord API for creating bots using ReasonML",
   "esy": {
     "build": "dune build -p #{self.name}",
-    "buildDev": "refmterr dune build --promote-install-files --root . --only-package #{self.name}",
-    "release": {
-      "releasedBinaries": [
-        "PingBot.exe"
-      ]
-    }
+    "buildDev":
+      "refmterr dune build --promote-install-files --root . --only-package #{self.name}",
+    "release": { "releasedBinaries": [ "VoiceBot.exe" ] }
   },
   "license": "MIT",
   "repository": {
@@ -25,16 +22,18 @@
   "dependencies": {
     "@esy-ocaml/reason": ">= 3.4.0 < 3.6.0",
     "@opam/cohttp": "2.5.1",
-    "@opam/dune": "*",
+    "@opam/dune": "2.3.1",
     "@opam/lwt": "5.3.0",
     "@opam/lwt_ssl": "1.1.3",
     "@opam/websocket": "2.14",
     "@opam/websocket-lwt-unix": "2.14",
     "@opam/yojson": "1.7.0",
-    "ocaml": "~4.8.1000"
+    "ocaml": "~4.08.1"
+  },
+  "resolutions": {
+    "@opam/websocket": "link:../ocaml-websocket/websocket.opam"
   },
   "devDependencies": {
-    "ocaml": "~4.8.1000",
     "refmterr": "*",
     "@opam/merlin": "*",
     "@reason-native/rely": "*"

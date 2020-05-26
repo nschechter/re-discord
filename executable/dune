@@ -1,6 +1,6 @@
 
-(executable
-   (name PingBot)
-   (public_name PingBot.exe)
+(executables
+   (names PingBot Greeter VoiceBot)
+   (public_names PingBot.exe Greeter.exe VoiceBot.exe)
    (libraries lwt re-discord.lib)
 )
