@@ -31,10 +31,10 @@
     "@opam/websocket": "2.14",
     "@opam/websocket-lwt-unix": "2.14",
     "@opam/yojson": "1.7.0",
-    "ocaml": "~4.09"
+    "ocaml": "~4.8.1000"
   },
   "devDependencies": {
-    "ocaml": "~4.09",
+    "ocaml": "~4.8.1000",
     "refmterr": "*",
     "@opam/merlin": "*",
     "@reason-native/rely": "*"
