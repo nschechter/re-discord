@@ -32,23 +32,24 @@ let rec triggerHeartbeat = (interval, sendFrame) => {
   |> Lwt_timeout.start;
 };
 
-let startSpeaking = (~speaking=1, ~ssrc, sendFrame) => {
+let sendVoicePacket = (sendFrame, packet) =>
+  sendFrame(Frame.create(packet));
+
+let startSpeaking = (sendFrame, ssrc, ~speaking=1) =>
   sendFrame(
     Frame.create(
       ~opcode=Opcode.Text,
       ~content=PayloadGenerator.voiceSpeak(~speaking, ssrc),
     ),
   );
-};
 
-let stopSpeaking = (~ssrc, sendFrame) => {
+let stopSpeaking = (sendFrame, ssrc, ()) =>
   sendFrame(
     Frame.create(
       ~opcode=Opcode.Text,
       ~content=PayloadGenerator.voiceSpeak(~speaking=0, ssrc),
     ),
   );
-};
 
 let handleEvent = (~state, ~sendFrame, ~onVoiceConnect, payload) => {
   payload
@@ -87,7 +88,12 @@ let handleEvent = (~state, ~sendFrame, ~onVoiceConnect, payload) => {
 
         switch (onVoiceConnect) {
         | Some(handle) =>
-          handle(newState, startSpeaking, stopSpeaking, sendFrame)
+          handle(
+            newState,
+            startSpeaking(~sendFrame, ~ssrc=readyData.ssrc),
+            stopSpeaking(~sendFrame, ~ssrc=readyData.ssrc),
+            sendVoicePacket,
+          )
         | None => ignore()
         };
 

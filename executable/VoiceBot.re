@@ -19,6 +19,15 @@ let onMessageWithVoice = (message: Message.t) => {
   };
 };
 
+let onVoiceConnect =
+    (
+      _state: ReDiscord.VoiceClient.state,
+      _startSpeaking,
+      _stopSpeaking,
+      _sendVoicePacket,
+    ) =>
+  ignore();
+
 let onReady = () => {
   print_endline("Connected!");
 };
