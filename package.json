@@ -30,9 +30,6 @@
     "@opam/yojson": "1.7.0",
     "ocaml": "~4.08.1"
   },
-  "resolutions": {
-    "@opam/websocket": "link:../ocaml-websocket/websocket.opam"
-  },
   "devDependencies": {
     "refmterr": "*",
     "@opam/merlin": "*",
