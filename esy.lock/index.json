@@ -1,7 +1,23 @@
 {
-  "checksum": "c0a47cc6a9b574037e08c8db62af86d3",
+  "checksum": "65c29176c4b571d4b24079d241ea59ad",
   "root": "re-discord@link-dev:./package.json",
   "node": {
+    "yarn-pkg-config@github:esy-ocaml/yarn-pkg-config#db3a0b63883606dd57c54a7158d560d6cba8cd79@d41d8cd9": {
+      "id":
+        "yarn-pkg-config@github:esy-ocaml/yarn-pkg-config#db3a0b63883606dd57c54a7158d560d6cba8cd79@d41d8cd9",
+      "name": "yarn-pkg-config",
+      "version":
+        "github:esy-ocaml/yarn-pkg-config#db3a0b63883606dd57c54a7158d560d6cba8cd79",
+      "source": {
+        "type": "install",
+        "source": [
+          "github:esy-ocaml/yarn-pkg-config#db3a0b63883606dd57c54a7158d560d6cba8cd79"
+        ]
+      },
+      "overrides": [],
+      "dependencies": [],
+      "devDependencies": []
+    },
     "refmterr@3.3.2@d41d8cd9": {
       "id": "refmterr@3.3.2@d41d8cd9",
       "name": "refmterr",
@@ -35,7 +51,7 @@
       "dependencies": [
         "ocaml@4.8.1000@d41d8cd9", "@opam/yojson@opam:1.7.0@7056d985",
         "@opam/websocket-lwt-unix@opam:2.14@03e9609b",
-        "@opam/websocket@link:../ocaml-websocket/websocket.opam",
+        "@opam/websocket@opam:2.14@cc2f10b7",
         "@opam/lwt_ssl@opam:1.1.3@9d044ebe", "@opam/lwt@opam:5.3.0@6519bffc",
         "@opam/dune@opam:2.3.1@a922f8c4", "@opam/cohttp@opam:2.5.1@4da4c043",
         "@esy-ocaml/reason@3.5.2@d41d8cd9"
@@ -195,29 +211,34 @@
       },
       "overrides": [],
       "dependencies": [
-        "ocaml@4.8.1000@d41d8cd9",
-        "@opam/websocket@link:../ocaml-websocket/websocket.opam",
+        "ocaml@4.8.1000@d41d8cd9", "@opam/websocket@opam:2.14@cc2f10b7",
         "@opam/lwt_log@opam:1.1.1@2d7a797f",
         "@opam/dune@opam:2.3.1@a922f8c4",
         "@opam/cohttp-lwt-unix@opam:2.5.4@9a0b6706",
         "@esy-ocaml/substs@0.0.1@d41d8cd9"
       ],
       "devDependencies": [
-        "ocaml@4.8.1000@d41d8cd9",
-        "@opam/websocket@link:../ocaml-websocket/websocket.opam",
+        "ocaml@4.8.1000@d41d8cd9", "@opam/websocket@opam:2.14@cc2f10b7",
         "@opam/lwt_log@opam:1.1.1@2d7a797f",
         "@opam/dune@opam:2.3.1@a922f8c4",
         "@opam/cohttp-lwt-unix@opam:2.5.4@9a0b6706"
       ]
     },
-    "@opam/websocket@link:../ocaml-websocket/websocket.opam": {
-      "id": "@opam/websocket@link:../ocaml-websocket/websocket.opam",
+    "@opam/websocket@opam:2.14@cc2f10b7": {
+      "id": "@opam/websocket@opam:2.14@cc2f10b7",
       "name": "@opam/websocket",
-      "version": "link:../ocaml-websocket/websocket.opam",
+      "version": "opam:2.14",
       "source": {
-        "type": "link",
-        "path": "../ocaml-websocket",
-        "manifest": "websocket.opam"
+        "type": "install",
+        "source": [
+          "archive:https://opam.ocaml.org/cache/sha256/30/30e40d098da86fb5f6b2adbc53211503c6e0c20422c21a7b41c8ac83168ca439#sha256:30e40d098da86fb5f6b2adbc53211503c6e0c20422c21a7b41c8ac83168ca439",
+          "archive:https://github.com/vbmithr/ocaml-websocket/releases/download/2.14/websocket-2.14.tbz#sha256:30e40d098da86fb5f6b2adbc53211503c6e0c20422c21a7b41c8ac83168ca439"
+        ],
+        "opam": {
+          "name": "websocket",
+          "version": "2.14",
+          "path": "esy.lock/opam/websocket.2.14"
+        }
       },
       "overrides": [],
       "dependencies": [
@@ -1629,8 +1650,8 @@
         "@opam/base-unix@opam:base@87d0b2eb"
       ]
     },
-    "@opam/conf-pkg-config@opam:1.3@79803de7": {
-      "id": "@opam/conf-pkg-config@opam:1.3@79803de7",
+    "@opam/conf-pkg-config@opam:1.3@93481236": {
+      "id": "@opam/conf-pkg-config@opam:1.3@93481236",
       "name": "@opam/conf-pkg-config",
       "version": "opam:1.3",
       "source": {
@@ -1642,8 +1663,16 @@
           "path": "esy.lock/opam/conf-pkg-config.1.3"
         }
       },
-      "overrides": [],
-      "dependencies": [ "@esy-ocaml/substs@0.0.1@d41d8cd9" ],
+      "overrides": [
+        {
+          "opamoverride":
+            "esy.lock/overrides/opam__s__conf_pkg_config_opam__c__1.3_opam_override"
+        }
+      ],
+      "dependencies": [
+        "yarn-pkg-config@github:esy-ocaml/yarn-pkg-config#db3a0b63883606dd57c54a7158d560d6cba8cd79@d41d8cd9",
+        "@esy-ocaml/substs@0.0.1@d41d8cd9"
+      ],
       "devDependencies": []
     },
     "@opam/conf-m4@opam:1@3b2b148a": {
@@ -1678,7 +1707,7 @@
       },
       "overrides": [],
       "dependencies": [
-        "@opam/conf-pkg-config@opam:1.3@79803de7",
+        "@opam/conf-pkg-config@opam:1.3@93481236",
         "@esy-ocaml/substs@0.0.1@d41d8cd9"
       ],
       "devDependencies": []
