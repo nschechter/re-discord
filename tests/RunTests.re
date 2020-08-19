@@ -1,1 +1,1 @@
-ReDiscordTest.TestFramework.cli();
+ReDiscordTest.TestFramework.cli(); 

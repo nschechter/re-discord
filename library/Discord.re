@@ -4,10 +4,12 @@ let make =
     (
       ~onReady=?,
       ~onMessage=?,
+      ~onMessageWithVoice=?,
       ~onGuildMemberAdd=?,
       ~onGuildMemberRemove=?,
       ~onReactionAdd=?,
       ~onReactionRemove=?,
+      ~onVoiceConnect=?,
       ~debug=false,
       token: string,
     ) => {
@@ -15,16 +17,20 @@ let make =
   >>= (
     response =>
       switch (response) {
-      | Error => Lwt.return_unit
+      | Error =>
+        print_endline("Unable to connect to the discord gateway")
+        |> Lwt.return
       | Success(data) =>
         Uri.with_scheme(Uri.of_string(data.url), Some("https"))
-        |> DiscordClient.make(
+        |> DiscordClient.connect(
              ~onReady,
              ~onMessage,
+             ~onMessageWithVoice,
              ~onGuildMemberAdd,
              ~onGuildMemberRemove,
              ~onReactionAdd,
              ~onReactionRemove,
+             ~onVoiceConnect,
              ~debug,
              ~token,
            )

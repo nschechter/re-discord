@@ -3,7 +3,7 @@ open Yojson.Basic.Util;
 type t = {
   token: string,
   id: string,
-  guildId: string,
+  guildId: option(string),
   content: string,
   channelId: string,
   author: Member.user,
@@ -23,7 +23,7 @@ let make = (token, id, guildId, content, channelId, author, timestamp): t => {
 let extract = (token, data: Yojson.Basic.t): t => {
   token,
   id: data |> member("id") |> to_string,
-  guildId: data |> member("guild_id") |> to_string,
+  guildId: data |> member("guild_id") |> to_string_option,
   content: data |> member("content") |> to_string,
   channelId: data |> member("channel_id") |> to_string,
   author: data |> member("author") |> Member.extractUser,
@@ -37,6 +37,7 @@ let reply = (content: string, message: t) => {
     content,
   )
   |> ignore;
+
   message;
 };
 
@@ -49,4 +50,14 @@ let react = (emoji: string, message: t) => {
   )
   |> ignore;
   message;
+};
+
+let handle = (token, data, onMessage) => {
+  let message = data |> extract(token);
+  onMessage(message);
+};
+
+let handleWithVoice = (token, data, onMessageWithVoice) => {
+  let message = data |> extract(token);
+  onMessageWithVoice(message);
 };

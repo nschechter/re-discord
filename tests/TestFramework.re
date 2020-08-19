@@ -4,4 +4,4 @@ include Rely.Make({
       projectDir: "../",
       snapshotDir: "./tests/__snapshots__",
     });
-});
+}); 

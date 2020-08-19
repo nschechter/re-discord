@@ -29,3 +29,7 @@ let extract = (token: string, data: Yojson.Basic.t): t => {
   channelId: data |> member("channel_id") |> to_string,
   guildId: data |> member("guild_id") |> to_string,
 };
+
+let handle = (token, data, handler) => {
+  data |> extract(token) |> handler;
+};

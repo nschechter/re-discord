@@ -19,8 +19,7 @@ let onGuildMemberAdd = (guild: Guild.t, member: Member.user) => {
 
 switch (token) {
 | Some(token) =>
-  Discord.make(~debug=false, ~onGuildMemberAdd, ~onReady, token)
-  |> Lwt_main.run
+  Discord.make(~onGuildMemberAdd, ~onReady, token) |> Lwt_main.run
 | None =>
   print_endline("ERROR: No token found, try exporting DISCORD_BOT_TOKEN")
 };
