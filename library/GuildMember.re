@@ -1,3 +1,11 @@
+open Yojson.Basic.Util;
+
+type t = {
+  guildId: option(string),
+  user: Member.user,
+};
+
 let extract = data => {
-  data |> Yojson.Basic.Util.member("user") |> Member.extractUser;
+  guildId: data |> member("guild_id") |> to_string_option,
+  user: data |> member("user") |> Member.extractUser,
 };

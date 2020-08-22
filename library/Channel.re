@@ -7,6 +7,7 @@ type t = {
   name: string,
   lastMessageId: option(string),
   parentId: option(string),
+  guildId: option(string),
 };
 
 let extract = (token: string, data: Yojson.Basic.t): t => {
@@ -16,6 +17,7 @@ let extract = (token: string, data: Yojson.Basic.t): t => {
   name: data |> member("name") |> to_string,
   lastMessageId: data |> member("last_message_id") |> to_string_option,
   parentId: data |> member("parent_id") |> to_string_option,
+  guildId: data |> member("guild_id") |> to_string_option,
 };
 
 let send = (content: string, channel: t) =>
