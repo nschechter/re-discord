@@ -2,7 +2,7 @@
 
 ## Overview
 
-Re-Discord is a library that provides an API for creating very simple [discord bots](https://discord.com/developers/docs/intro) for yourself! This library is catered towards creating bots that serve **only one guild (discord server)**, with support for more servers & possibly even sharding in the future.
+Re-Discord is a library that provides an API for creating very simple [discord bots](https://discord.com/developers/docs/intro)! This library is catered towards creating bots that serve **up to a few guilds (servers)**, with possible support for sharding in the future.
 
 ## Developing:
 
