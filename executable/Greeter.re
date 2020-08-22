@@ -6,13 +6,14 @@ let onReady = () => {
   print_endline("Connected!");
 };
 
-let onGuildMemberAdd = (guild: Guild.t, member: Member.user) => {
+let onGuildMemberAdd = (guild: Guild.t, member: GuildMember.t) => {
   let generalChannel =
     guild.channels
     |> List.find_opt((channel: Channel.t) => channel.name == "general");
 
   switch (generalChannel) {
-  | Some(channel) => channel |> Channel.send("Welcome, " ++ member.username)
+  | Some(channel) =>
+    channel |> Channel.send("Welcome, " ++ member.user.username)
   | _ => ignore()
   };
 };

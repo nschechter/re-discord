@@ -6,14 +6,14 @@ type state = {
   token: string,
   heartbeatInterval: option(int),
   sessionId: option(string),
-  guild: option(Guild.t),
+  guilds: Guild.Map.t(Guild.t),
   botUser: option(Member.user),
   isInVoiceChannel: bool,
 };
 
 let lastSequence = ref(0);
 
-let rec triggerHeartbeat = (interval, sendFrame) => {
+let rec triggerHeartbeat = (interval, sendFrame) =>
   Lwt_timeout.create(
     interval,
     () => {
@@ -29,13 +29,10 @@ let rec triggerHeartbeat = (interval, sendFrame) => {
     },
   )
   |> Lwt_timeout.start;
-};
 
-let setSequence = num => {
-  lastSequence := num;
-};
+let setSequence = num => lastSequence := num;
 
-let voiceConnect = (~sendFrame, ~guildId, ~channelId) => {
+let voiceConnect = (~sendFrame, ~guildId, ~channelId) =>
   switch (channelId) {
   | Some(id) =>
     Frame.create(
@@ -47,7 +44,6 @@ let voiceConnect = (~sendFrame, ~guildId, ~channelId) => {
     |> ignore
   | None => ignore()
   };
-};
 
 let handleEvent =
     (
@@ -64,7 +60,7 @@ let handleEvent =
       ~onReactionRemove,
       ~onVoiceConnect,
       payload,
-    ) => {
+    ) =>
   payload
   |> PayloadParser.parse(setSequence)
   |> (
@@ -79,6 +75,7 @@ let handleEvent =
           ),
         )
         |> ignore;
+
         state;
       }
     | Ready(payload) => {
@@ -91,70 +88,119 @@ let handleEvent =
         };
       }
     | GuildCreate(payload) => {
-        {...state, guild: Some(Guild.extract(token, payload.d))};
+        let guild = Guild.extract(token, payload.d);
+        let newGuildsMap = Guild.Map.add(guild.id, guild, state.guilds);
+
+        {...state, guilds: newGuildsMap};
       }
-    | GuildMemberAdd(payload) =>
-      switch (onGuildMemberAdd, state.guild) {
-      | (Some(handler), Some(guild)) =>
-        payload.d |> GuildMember.extract |> handler(guild);
-        {
-          ...state,
-          guild: Some(Guild.addMember(guild, payload.d |> Member.extract)),
+    | GuildMemberAdd(payload) => {
+        let member = payload.d |> GuildMember.extract;
+
+        switch (member.guildId) {
+        | Some(guildId) =>
+          Guild.Map.find_opt(guildId, state.guilds)
+          |> (
+            fun
+            | Some(guild) => {
+                let newGuild = Guild.addMember(guild, member);
+
+                let newGuildsMap =
+                  Guild.Map.remove(guild.id, state.guilds)
+                  |> Guild.Map.add(newGuild.id, newGuild);
+
+                switch (onGuildMemberAdd) {
+                | Some(handler) => handler(newGuild, member)
+                | None => ignore()
+                };
+
+                {...state, guilds: newGuildsMap};
+              }
+            | None => state
+          )
+        | None => state
         };
-      | (_, Some(guild)) => {
-          ...state,
-          guild: Some(Guild.addMember(guild, payload.d |> Member.extract)),
-        }
-      | (_, _) => state
       }
-    | GuildMemberRemove(payload) =>
-      // GuildMember.onMemberRemove(onGuildMemberRemove, payload, state)
-      switch (onGuildMemberRemove, state.guild) {
-      | (Some(handler), Some(guild)) =>
-        payload.d |> GuildMember.extract |> handler(guild);
-        {
-          ...state,
-          guild:
-            Some(Guild.removeMember(guild, payload.d |> Member.extract)),
+    | GuildMemberRemove(payload) => {
+        let member = payload.d |> GuildMember.extract;
+
+        switch (member.guildId) {
+        | Some(guildId) =>
+          Guild.Map.find_opt(guildId, state.guilds)
+          |> (
+            fun
+            | Some(guild) => {
+                let newGuild = Guild.removeMember(guild, member);
+
+                let newGuildsMap =
+                  Guild.Map.remove(guild.id, state.guilds)
+                  |> Guild.Map.add(newGuild.id, newGuild);
+
+                switch (onGuildMemberRemove) {
+                | Some(handler) => handler(newGuild, member)
+                | None => ignore()
+                };
+
+                {...state, guilds: newGuildsMap};
+              }
+            | None => state
+          )
+        | None => state
         };
-      | (_, Some(guild)) => {
-          ...state,
-          guild:
-            Some(Guild.removeMember(guild, payload.d |> Member.extract)),
-        }
-      | (_, _) => state
       }
-    | ChannelCreate(payload) =>
-      switch (state.guild) {
-      | Some(guild) => {
-          ...state,
-          guild:
-            Some(
-              Guild.addChannel(guild, payload.d |> Channel.extract(token)),
-            ),
-        }
-      | None => state
+    | ChannelCreate(payload) => {
+        let channel = payload.d |> Channel.extract(token);
+
+        channel.guildId
+        |> (
+          fun
+          | Some(guildId) => {
+              Guild.Map.find_opt(guildId, state.guilds)
+              |> (
+                fun
+                | Some(guild) => {
+                    let newGuild = Guild.addChannel(guild, channel);
+                    let newGuildsMap =
+                      Guild.Map.remove(guild.id, state.guilds)
+                      |> Guild.Map.add(newGuild.id, newGuild);
+
+                    {...state, guilds: newGuildsMap};
+                  }
+                | None => state
+              );
+            }
+          | None => state
+        );
       }
-    | ChannelDelete(payload) =>
-      switch (state.guild) {
-      | Some(guild) => {
-          ...state,
-          guild:
-            Some(
-              Guild.deleteChannel(
-                guild,
-                payload.d |> Channel.extract(token),
-              ),
-            ),
-        }
-      | None => state
+    | ChannelDelete(payload) => {
+        let channel = payload.d |> Channel.extract(token);
+
+        channel.guildId
+        |> (
+          fun
+          | Some(guildId) => {
+              Guild.Map.find_opt(guildId, state.guilds)
+              |> (
+                fun
+                | Some(guild) => {
+                    let newGuild = Guild.removeChannel(guild, channel);
+                    let newGuildsMap =
+                      Guild.Map.remove(guild.id, state.guilds)
+                      |> Guild.Map.add(newGuild.id, newGuild);
+
+                    {...state, guilds: newGuildsMap};
+                  }
+                | None => state
+              );
+            }
+          | None => state
+        );
       }
     | MessageCreate(payload) => {
-        let userId = Message.extract(token, payload.d).author.id;
+        let message = Message.extract(token, payload.d);
 
-        switch (state.botUser) {
-        | Some(botUser) =>
-          userId == botUser.id
+        switch (state.botUser, message.guildId) {
+        | (Some(botUser), Some(guildId)) =>
+          message.author.id == botUser.id
             ? ignore()
             : {
               switch (onMessage) {
@@ -163,10 +209,14 @@ let handleEvent =
               | None => ignore()
               };
 
-              switch (onMessageWithVoice, state.guild, state.isInVoiceChannel) {
+              switch (
+                onMessageWithVoice,
+                Guild.Map.find_opt(guildId, state.guilds),
+                state.isInVoiceChannel,
+              ) {
               | (Some(handler), Some(guild), false) =>
                 List.find_opt(
-                  (vs: VoiceState.t) => vs.userId == userId,
+                  (vs: VoiceState.t) => vs.userId == message.author.id,
                   guild.voiceStates,
                 )
                 |> (
@@ -189,7 +239,7 @@ let handleEvent =
               | (_, _, _) => ignore()
               };
             }
-        | None => ignore()
+        | (_, _) => ignore()
         };
 
         state;
@@ -199,6 +249,7 @@ let handleEvent =
         | Some(handler) => MessageReaction.handle(token, payload.d, handler)
         | None => ignore()
         };
+
         state;
       }
     | MessageReactionAdd(payload) => {
@@ -206,20 +257,33 @@ let handleEvent =
         | Some(handler) => MessageReaction.handle(token, payload.d, handler)
         | None => ignore()
         };
+
         state;
       }
     | VoiceStateUpdate(payload) => {
-        switch (state.guild, state.botUser) {
-        | (Some(guild), Some(user)) =>
-          let voiceState = payload.d |> VoiceState.extract;
+        let voiceState = payload.d |> VoiceState.extract;
+        switch (voiceState.guildId, state.botUser) {
+        | (Some(guildId), Some(user)) =>
+          Guild.Map.find_opt(guildId, state.guilds)
+          |> (
+            fun
+            | Some(guild) => {
+                let newGuild = Guild.updateVoiceState(guild, voiceState);
+                let newGuildsMap =
+                  Guild.Map.remove(guild.id, state.guilds)
+                  |> Guild.Map.add(newGuild.id, newGuild);
 
-          {
-            ...state,
-            isInVoiceChannel:
-              voiceState.userId == user.id && voiceState.channelId == None
-                ? false : state.isInVoiceChannel,
-            guild: Some(Guild.updateVoiceState(guild, voiceState)),
-          };
+                {
+                  ...state,
+                  isInVoiceChannel:
+                    voiceState.userId == user.id
+                    && voiceState.channelId == None
+                      ? false : state.isInVoiceChannel,
+                  guilds: newGuildsMap,
+                };
+              }
+            | None => state
+          )
         | (_, _) => state
         };
       }
@@ -229,7 +293,11 @@ let handleEvent =
         let endpoint =
           String.split_on_char(':', voiceServer.endpoint) |> List.hd;
 
-        switch (state.botUser, state.guild, state.sessionId) {
+        switch (
+          state.botUser,
+          Guild.Map.find_opt(voiceServer.guildId, state.guilds),
+          state.sessionId,
+        ) {
         | (Some(user), Some(guild), Some(sessionId)) =>
           VoiceClient.connect(
             ~debug,
@@ -252,12 +320,9 @@ let handleEvent =
 
         {...state, isInVoiceChannel: true};
       }
-    | HeartbeatACK => {
-        state;
-      }
+    | HeartbeatACK
     | _ => state
   );
-};
 
 let connect =
     (
@@ -279,7 +344,7 @@ let connect =
       token,
       heartbeatInterval: None,
       sessionId: None,
-      guild: None,
+      guilds: Guild.Map.empty,
       botUser: None,
       isInVoiceChannel: false,
     },
